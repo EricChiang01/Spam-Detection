@@ -39,6 +39,41 @@ print(f'Precision: {precision:.2f}')
 print(f'Recall: {recall:.2f}')
 print(f'F1-score: {f1:.2f}\n')
 
+# Get the indices of the spam messages
+spam_indices = data[data['class'] == 'spam'].index
+
+# Get the messages from the spam messages
+spam_messages = data.loc[spam_indices, 'message']
+
+# Extract features from the spam messages
+vectorizer = CountVectorizer(stop_words='english')
+spam_features = vectorizer.fit_transform(spam_messages)
+
+# Get the most common words in spam messages
+word_counts = spam_features.sum(axis=0)
+word_counts_df = pd.DataFrame(word_counts, columns=vectorizer.get_feature_names())
+word_counts_df = word_counts_df.T
+word_counts_df.columns = ['count']
+word_counts_df = word_counts_df.sort_values('count', ascending=False).head(10)
+
+# Plot the most common words in spam messages
+plt.bar(word_counts_df.index, word_counts_df['count'])
+plt.title('Most Common Words in Spam Messages')
+plt.xlabel('Word')
+plt.ylabel('Count')
+plt.show()
+
+# Get the most common sentences in spam messages
+sentence_counts = pd.Series(spam_messages).value_counts().head(10)
+
+# Plot the most common sentences in spam messages
+plt.bar(sentence_counts.index, sentence_counts.values)
+plt.title('Most Common Sentences in Spam Messages')
+plt.xticks(rotation=90)
+plt.xlabel('Sentence')
+plt.ylabel('Count')
+plt.show()
+
 # Train a Naive Bayes classifier on the entire dataset
 X_features = vectorizer.fit_transform(data['message'])
 y = data['class']
